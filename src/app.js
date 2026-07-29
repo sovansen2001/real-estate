@@ -1,0 +1,174 @@
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import cookieParser from "cookie-parser";
+import rateLimit from "express-rate-limit";
+
+import { errorMiddleware } from "./middleware/error.middleware.js";
+
+/*
+ * ============================================================
+ * EXPRESS APPLICATION
+ * ============================================================
+ */
+
+const app = express();
+
+/*
+ * ============================================================
+ * SECURITY HEADERS
+ * ============================================================
+ *
+ * Helmet adds several security-related HTTP headers.
+ * ============================================================
+ */
+
+app.use(helmet());
+
+/*
+ * ============================================================
+ * CORS
+ * ============================================================
+ *
+ * Only our configured frontend is allowed to access the API.
+ *
+ * credentials: true is necessary if your senior's
+ * authentication uses cookies.
+ * ============================================================
+ */
+
+app.use(
+    cors({
+        origin: process.env.CLIENT_URL,
+        credentials: true,
+
+        methods: [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+        ]
+    })
+);
+
+/*
+ * ============================================================
+ * GLOBAL RATE LIMIT
+ * ============================================================
+ *
+ * This is a basic first layer.
+ *
+ * Individual sensitive APIs can later receive stricter
+ * rate limits.
+ * ============================================================
+ */
+
+const globalRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+
+    max: 300,
+
+    standardHeaders: true,
+
+    legacyHeaders: false,
+
+    message: {
+        success: false,
+        message:
+            "Too many requests. Please try again later."
+    }
+});
+
+app.use(globalRateLimiter);
+
+/*
+ * ============================================================
+ * BODY PARSERS
+ * ============================================================
+ *
+ * Keep JSON requests reasonably small.
+ *
+ * Image uploads use Multer separately.
+ * ============================================================
+ */
+
+app.use(
+    express.json({
+        limit: "100kb"
+    })
+);
+
+app.use(
+    express.urlencoded({
+        extended: false,
+        limit: "100kb"
+    })
+);
+
+/*
+ * ============================================================
+ * COOKIE PARSER
+ * ============================================================
+ *
+ * Required if authentication uses HttpOnly cookies.
+ * ============================================================
+ */
+
+app.use(cookieParser());
+
+/*
+ * ============================================================
+ * HEALTH CHECK
+ * ============================================================
+ */
+
+app.get("/health", (req, res) => {
+    return res.status(200).json({
+        success: true,
+        message: "Real Estate API is running",
+        environment: process.env.NODE_ENV
+    });
+});
+
+/*
+ * ============================================================
+ * API ROUTES
+ * ============================================================
+ *
+ * Seller routes will be registered here after we create them.
+ *
+ * Example:
+ *
+ * app.use(
+ *     "/api/v1/seller",
+ *     sellerRouter
+ * );
+ * ============================================================
+ */
+
+/*
+ * ============================================================
+ * 404 HANDLER
+ * ============================================================
+ */
+
+app.use((req, res) => {
+    return res.status(404).json({
+        success: false,
+        message: "API route not found"
+    });
+});
+
+/*
+ * ============================================================
+ * GLOBAL ERROR HANDLER
+ * ============================================================
+ *
+ * This must be the LAST middleware.
+ * ============================================================
+ */
+
+app.use(errorMiddleware);
+
+export default app;
