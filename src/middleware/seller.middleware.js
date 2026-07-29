@@ -1,28 +1,3 @@
-/*
- * ============================================================
- * SELLER AUTHORIZATION MIDDLEWARE
- * ============================================================
- *
- * IMPORTANT:
- *
- * Your senior already has authentication.
- *
- * His authentication middleware must execute BEFORE this
- * middleware and attach the authenticated user to:
- *
- *     req.user
- *
- * Example:
- *
- *     req.user = {
- *         _id: "...",
- *         role: "seller"
- *     }
- *
- * We will connect this middleware to your senior's exact
- * authentication middleware after checking his project.
- * ============================================================
- */
 
 export const requireSeller = (req, res, next) => {
     /*
