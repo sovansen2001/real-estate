@@ -1,5 +1,5 @@
 import Property from "../models/property.model.js";
-import ApiError from "../utils/ApiError.js";
+import ApiError from "../utils/api-error.js";
 
 /*
 |--------------------------------------------------------------------------
