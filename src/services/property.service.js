@@ -13,6 +13,48 @@ import ApiError from "../utils/ApiError.js";
 |--------------------------------------------------------------------------
 */
 class PropertyService {
+
+    /*
+|--------------------------------------------------------------------------
+| Check Whether Property Can Be Edited
+|--------------------------------------------------------------------------
+*/
+
+canEdit(property) {
+
+    return ["Draft", "Rejected"].includes(
+        property.approvalStatus
+    );
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| Check Whether Property Can Be Deleted
+|--------------------------------------------------------------------------
+*/
+
+canDelete(property) {
+
+    return ["Draft", "Rejected"].includes(
+        property.approvalStatus
+    );
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| Check Whether Property Can Be Submitted
+|--------------------------------------------------------------------------
+*/
+
+canSubmit(property) {
+
+    return ["Draft", "Rejected"].includes(
+        property.approvalStatus
+    );
+
+}
     /*
     |--------------------------------------------------------------------------
     | Create Property
@@ -107,22 +149,11 @@ class PropertyService {
         -------------------------------------------------------------
         */
 
-        if (
-
-            property.approvalStatus !== "Draft" &&
-
-            property.approvalStatus !== "Rejected"
-
-        ) {
-
+        if (!this.canEdit(property)) {
             throw new ApiError(
-
                 403,
-
                 "Only Draft or Rejected properties can be edited."
-
             );
-
         }
 
         Object.assign(
@@ -161,23 +192,13 @@ class PropertyService {
         -------------------------------------------------------------
         */
 
-        if (
+        if (!this.canDelete(property)) {
+           throw new ApiError(
+        403,
+        "This property cannot be deleted."
+    );
 
-            property.approvalStatus !== "Draft" &&
-
-            property.approvalStatus !== "Rejected"
-
-        ) {
-
-            throw new ApiError(
-
-                403,
-
-                "This property cannot be deleted."
-
-            );
-
-        }
+}
 
         /*
         -------------------------------------------------------------
@@ -217,24 +238,12 @@ class PropertyService {
         -------------------------------------------------------------
         */
 
-        if (
-
-            property.approvalStatus !== "Draft" &&
-
-            property.approvalStatus !== "Rejected"
-
-        ) {
-
+        if (!this.canSubmit(property)) {
             throw new ApiError(
-
-                400,
-
-                "Property cannot be submitted."
-
-            );
-
-        }
-
+            400,
+            "Property cannot be submitted."
+        );
+    }
         /*
         -------------------------------------------------------------
         | Require at least one image.
@@ -242,29 +251,17 @@ class PropertyService {
         */
 
         if (
-
             !property.images ||
-
             property.images.length === 0
-
         ) {
-
             throw new ApiError(
-
                 400,
-
                 "Upload at least one property image."
-
             );
-
         }
-
         property.approvalStatus = "Pending";
-
         await property.save();
-
         return property;
-
     }
 
     /*
