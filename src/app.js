@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 
 import { errorMiddleware } from "./middleware/error.middleware.js";
-
+import multerErrorHandler from "./middleware/multer-error.middleware.js";
 /*
  * ============================================================
  * EXPRESS APPLICATION
@@ -170,5 +170,6 @@ app.use((req, res) => {
  */
 
 app.use(errorMiddleware);
-
+app.use(multerErrorHandler);
+app.use(errorMiddleware);
 export default app;
