@@ -179,7 +179,6 @@ class PropertyController {
             )
 
         );
-
     });
 
     /*
@@ -187,31 +186,18 @@ class PropertyController {
     | Submit Property For Approval
     |--------------------------------------------------------------------------
     */
-
     submitForApproval = asyncHandler(async (req, res) => {
-
         const property = await PropertyService.submitForApproval(
-
             req.params.propertyId,
-
             req.user._id
-
         );
-
         return res.status(200).json(
-
             new ApiResponse(
-
                 200,
-
                 property,
-
                 "Property submitted for approval."
-
             )
-
         );
-
     });
 
     /*
@@ -219,31 +205,18 @@ class PropertyController {
     | Seller Dashboard Statistics
     |--------------------------------------------------------------------------
     */
-
     getDashboardStats = asyncHandler(async (req, res) => {
-
         const statistics = await PropertyService.getDashboardStats(
-
             req.user._id
-
         );
-
         return res.status(200).json(
-
             new ApiResponse(
-
                 200,
-
                 statistics,
-
                 "Dashboard statistics fetched successfully."
-
             )
-
         );
-
     });
-
 }
 
 export default new PropertyController();
