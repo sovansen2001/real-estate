@@ -3,15 +3,16 @@ import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
-
+import dashboardRoutes from "./routes/dashboard.routes.js";
+import sellerProfileRoutes from "./routes/seller/seller-profile.routes.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import multerErrorHandler from "./middleware/multer-error.middleware.js";
+
 /*
  * ============================================================
  * EXPRESS APPLICATION
  * ============================================================
  */
-
 const app = express();
 
 /*
@@ -22,7 +23,6 @@ const app = express();
  * Helmet adds several security-related HTTP headers.
  * ============================================================
  */
-
 app.use(helmet());
 
 /*
@@ -36,12 +36,10 @@ app.use(helmet());
  * authentication uses cookies.
  * ============================================================
  */
-
 app.use(
     cors({
         origin: process.env.CLIENT_URL,
         credentials: true,
-
         methods: [
             "GET",
             "POST",
@@ -63,23 +61,17 @@ app.use(
  * rate limits.
  * ============================================================
  */
-
 const globalRateLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-
     max: 300,
-
     standardHeaders: true,
-
     legacyHeaders: false,
-
     message: {
         success: false,
         message:
             "Too many requests. Please try again later."
     }
 });
-
 app.use(globalRateLimiter);
 
 /*
@@ -92,13 +84,11 @@ app.use(globalRateLimiter);
  * Image uploads use Multer separately.
  * ============================================================
  */
-
 app.use(
     express.json({
         limit: "100kb"
     })
 );
-
 app.use(
     express.urlencoded({
         extended: false,
@@ -114,7 +104,6 @@ app.use(
  * Required if authentication uses HttpOnly cookies.
  * ============================================================
  */
-
 app.use(cookieParser());
 
 /*
@@ -122,7 +111,6 @@ app.use(cookieParser());
  * HEALTH CHECK
  * ============================================================
  */
-
 app.get("/health", (req, res) => {
     return res.status(200).json({
         success: true,
@@ -135,24 +123,20 @@ app.get("/health", (req, res) => {
  * ============================================================
  * API ROUTES
  * ============================================================
- *
- * Seller routes will be registered here after we create them.
- *
- * Example:
- *
- * app.use(
- *     "/api/v1/seller",
- *     sellerRouter
- * );
- * ============================================================
  */
-
+app.use(
+    "/api/v1/seller/dashboard",
+    dashboardRoutes
+);
+app.use(
+    "/api/v1/seller/profile",
+    sellerProfileRoutes
+);
 /*
  * ============================================================
  * 404 HANDLER
  * ============================================================
  */
-
 app.use((req, res) => {
     return res.status(404).json({
         success: false,
@@ -164,12 +148,7 @@ app.use((req, res) => {
  * ============================================================
  * GLOBAL ERROR HANDLER
  * ============================================================
- *
- * This must be the LAST middleware.
- * ============================================================
  */
-
-app.use(errorMiddleware);
 app.use(multerErrorHandler);
 app.use(errorMiddleware);
 export default app;
