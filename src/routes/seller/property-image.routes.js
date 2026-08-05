@@ -9,7 +9,6 @@ const router = express.Router();
 | Upload Property Images
 |--------------------------------------------------------------------------
 */
-
 router.post(
     "/:propertyId/images",
     upload.array("images", 15),
@@ -21,7 +20,6 @@ router.post(
 | Delete Property Image
 |--------------------------------------------------------------------------
 */
-
 router.delete(
     "/:propertyId/images/:imageId",
     PropertyImageController.deleteImage
@@ -32,7 +30,6 @@ router.delete(
 | Set Primary Image
 |--------------------------------------------------------------------------
 */
-
 router.patch(
     "/:propertyId/images/:imageId/primary",
     PropertyImageController.setPrimaryImage
@@ -43,7 +40,6 @@ router.patch(
 | Reorder Property Images
 |--------------------------------------------------------------------------
 */
-
 router.patch(
     "/:propertyId/images/reorder",
     PropertyImageController.reorderImages
