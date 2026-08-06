@@ -6,7 +6,6 @@ import DashboardController from "../controllers/seller/dashboard.controller.js";
 // import verifySeller from "../middleware/verify-seller.middleware.js";
 
 const router = Router();
-
 /*
 |--------------------------------------------------------------------------
 | Seller Dashboard Routes
@@ -16,31 +15,30 @@ const router = Router();
 | the authentication module is completed.
 |--------------------------------------------------------------------------
 */
-
 // Dashboard Statistics
 router.get(
-    "/",
+    "/:sellerId",
     // verifySeller,
     DashboardController.getDashboard
 );
 
 // Recent Properties
 router.get(
-    "/recent-properties",
+    "/:sellerId/recent-properties",
     // verifySeller,
     DashboardController.getRecentProperties
 );
 
 // Top Viewed Properties
 router.get(
-    "/top-properties",
+    "/:sellerId/top-properties",
     // verifySeller,
     DashboardController.getTopViewedProperties
 );
 
 // Monthly Statistics
 router.get(
-    "/monthly-statistics",
+    "/:sellerId/monthly-statistics",
     // verifySeller,
     DashboardController.getMonthlyStatistics
 );

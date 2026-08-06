@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import sellerProfileRoutes from "./routes/seller/seller-profile.routes.js";
+import sellerPropertyRoutes from "./routes/seller/seller-property.routes.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import multerErrorHandler from "./middleware/multer-error.middleware.js";
 
@@ -131,6 +132,10 @@ app.use(
 app.use(
     "/api/v1/seller/profile",
     sellerProfileRoutes
+);
+app.use(
+    "/api/v1/seller/property",
+    sellerPropertyRoutes
 );
 /*
  * ============================================================

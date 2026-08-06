@@ -28,8 +28,8 @@ class DashboardController {
             --------------------------------------------------------------
             */
 
-            const sellerId = req.user?._id;
-
+            //const sellerId = req.user?._id;
+            const { sellerId } = req.params;
             const dashboard = await DashboardService.getDashboardStats(
                 sellerId
             );
@@ -62,7 +62,8 @@ class DashboardController {
 
         try {
 
-            const sellerId = req.user?._id;
+            //const sellerId = req.user?._id;
+            const { sellerId } = req.params;
 
             const properties =
                 await DashboardService.getRecentProperties(
@@ -97,8 +98,8 @@ class DashboardController {
 
         try {
 
-            const sellerId = req.user?._id;
-
+            //const sellerId = req.user?._id;
+            const { sellerId } = req.params;
             const properties =
                 await DashboardService.getTopViewedProperties(
                     sellerId
@@ -131,8 +132,8 @@ class DashboardController {
     async getMonthlyStatistics(req, res, next) {
 
         try {
-
-            const sellerId = req.user?._id;
+            //const sellerId = req.user?._id;
+            const { sellerId } = req.params;
 
             const statistics =
                 await DashboardService.getMonthlyStatistics(
