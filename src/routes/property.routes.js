@@ -6,7 +6,7 @@ import { createPropertySchema, updatePropertySchema } from "../validators/proper
 
 // Temporary authentication middleware
 // Replace these imports middleware later.
-import { verifyJWT, authorizeRoles } from "../middleware/auth.middleware.js";
+//import { verifyJWT, authorizeRoles } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
@@ -24,8 +24,8 @@ const router = express.Router();
 // Create Property
 router.post(
     "/",
-    verifyJWT,
-    authorizeRoles("seller"),
+    //verifyJWT,
+    //authorizeRoles("seller"),
     validate(createPropertySchema),
     PropertyController.createProperty
 );
