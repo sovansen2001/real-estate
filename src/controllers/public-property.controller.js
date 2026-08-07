@@ -35,13 +35,38 @@ class PublicPropertyController {
         );
 
     });
+    
+    /*
+   |--------------------------------------------------------------------------
+   | Get Latest Properties
+   |--------------------------------------------------------------------------
+   */
+
+getLatestProperties = asyncHandler(async (req, res) => {
+    const properties =
+        await PublicPropertyService.getLatestProperties();
+
+    return res.status(200).json(
+
+        new ApiResponse(
+
+            200,
+
+            properties,
+
+            "Latest properties fetched successfully."
+
+        )
+
+    );
+
+});
 
     /*
     |--------------------------------------------------------------------------
     | Get Property Details
     |--------------------------------------------------------------------------
     */
-
     getPropertyDetails = asyncHandler(async (req, res) => {
 
         const property =

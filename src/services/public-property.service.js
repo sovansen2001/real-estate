@@ -27,6 +27,36 @@ class PublicPropertyService {
             .limit(limit)
             .lean();
     }
+    
+    /*
+|--------------------------------------------------------------------------
+| GET LATEST PROPERTIES
+|--------------------------------------------------------------------------
+*/
+
+async getLatestProperties(limit = 12) {
+
+    return await Property.find({
+
+        isDeleted: false,
+
+        listingStatus: "Active",
+
+        approvalStatus: "Approved"
+
+    })
+
+        .sort({
+
+            createdAt: -1
+
+        })
+
+        .limit(limit)
+
+        .lean();
+
+}
 
     /*
     |--------------------------------------------------------------------------
