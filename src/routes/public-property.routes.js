@@ -18,6 +18,11 @@ router.get(
     "/latest",
     PublicPropertyController.getLatestProperties
 );
+// Search Properties
+router.get(
+    "/search",
+    PublicPropertyController.searchProperties
+);
 // Property Details
 router.get(
     "/:propertyId",
