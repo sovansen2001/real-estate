@@ -29,34 +29,113 @@ class PublicPropertyService {
     }
     
     /*
-|--------------------------------------------------------------------------
-| GET LATEST PROPERTIES
-|--------------------------------------------------------------------------
-*/
-
-async getLatestProperties(limit = 12) {
-
-    return await Property.find({
-
-        isDeleted: false,
-
-        listingStatus: "Active",
-
-        approvalStatus: "Approved"
-
-    })
-
-        .sort({
-
-            createdAt: -1
-
+    |--------------------------------------------------------------------------
+    | GET LATEST PROPERTIES
+    |--------------------------------------------------------------------------
+    */
+    async getLatestProperties(limit = 12) {
+        return await Property.find({
+            isDeleted: false,
+            listingStatus: "Active",
+            approvalStatus: "Approved"
         })
-
+        .sort({
+            createdAt: -1
+        })
         .limit(limit)
-
         .lean();
+    }
 
-}
+    /*
+    |--------------------------------------------------------------------------
+    | SEARCH & FILTER PROPERTIES
+    |--------------------------------------------------------------------------
+    */
+    async searchProperties(filters) {
+        const query = {
+            isDeleted: false,
+            listingStatus: "Active",
+            approvalStatus: "Approved"
+        };
+
+        /*
+        |--------------------------------------------------------------------------
+        | Search by Keyword
+        |--------------------------------------------------------------------------
+        */
+        if (filters.keyword) {
+            query.$or = [
+                {
+                    title: {
+                        $regex: filters.keyword,
+                        $options: "i"
+                    }
+                },
+                {
+                    description: {
+                        $regex: filters.keyword,
+                        $options: "i"
+                    }
+                }
+            ];
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Listing Type
+        |--------------------------------------------------------------------------
+        */
+        if (filters.listingType) {
+            query.listingType = filters.listingType;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Property Type
+        |--------------------------------------------------------------------------
+        */
+        if (filters.propertyType) {
+            query.propertyType = filters.propertyType;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | City
+        |--------------------------------------------------------------------------
+        */
+        if (filters.city) {
+            query["location.city"] = filters.city;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | State
+        |--------------------------------------------------------------------------
+        */
+        if (filters.state) {
+            query["location.state"] = filters.state;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Price Range
+        |--------------------------------------------------------------------------
+        */
+        if (filters.minPrice || filters.maxPrice) {
+            query.price = {};
+            if (filters.minPrice) {
+                query.price.$gte = Number(filters.minPrice);
+            }
+            if (filters.maxPrice) {
+                query.price.$lte = Number(filters.maxPrice);
+            }
+        }
+        return await Property.find(query)
+        .sort({
+            createdAt: -1
+        })
+        .lean();
+    }
 
     /*
     |--------------------------------------------------------------------------
