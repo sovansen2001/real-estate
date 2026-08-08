@@ -546,12 +546,20 @@ propertySchema.index({
     slug: 1
 });
 
-/*
-|--------------------------------------------------------------------------
-| Future Full Text Search
-|--------------------------------------------------------------------------
-*/
 propertySchema.index({
     title: "text",
     description: "text"
 });
+
+/*
+|--------------------------------------------------------------------------
+| PROPERTY MODEL
+|--------------------------------------------------------------------------
+*/
+
+const Property = mongoose.model(
+    "Property",
+    propertySchema
+);
+
+export default Property;

@@ -16,17 +16,24 @@ class PublicPropertyService {
     |--------------------------------------------------------------------------
     */
     async getFeaturedProperties(limit = 8) {
-        return await Property.find({
-            isDeleted: false,
-            listingStatus: "Active",
-            approvalStatus: "Approved"
+
+    return await Property.find({
+
+        isDeleted: false,
+
+        listingStatus: "Active",
+
+        "approval.status": "Approved",
+
+        isFeatured: true
+
+    })
+        .sort({
+            createdAt: -1
         })
-            .sort({
-                createdAt: -1
-            })
-            .limit(limit)
-            .lean();
-    }
+        .limit(limit)
+        .lean();
+}
     
     /*
     |--------------------------------------------------------------------------
@@ -37,7 +44,7 @@ class PublicPropertyService {
         return await Property.find({
             isDeleted: false,
             listingStatus: "Active",
-            approvalStatus: "Approved"
+            "approval.status": "Approved"
         })
         .sort({
             createdAt: -1
@@ -55,7 +62,7 @@ class PublicPropertyService {
         const query = {
             isDeleted: false,
             listingStatus: "Active",
-            approvalStatus: "Approved"
+            "approval.status": "Approved"
         };
 
         /*
@@ -147,7 +154,7 @@ class PublicPropertyService {
             _id: propertyId,
             isDeleted: false,
             listingStatus: "Active",
-            approvalStatus: "Approved"
+            "approval.status": "Approved"
         }).lean();
 
         if (!property) {
