@@ -5,66 +5,78 @@ import ApiError from "../utils/api-error.js";
 |--------------------------------------------------------------------------
 | Property Service
 |--------------------------------------------------------------------------
+|
 | This service contains all business logic related to Property.
+|
 | NOTE:
 | -----
 | Do NOT use req or res in this file.
 | Controllers call these methods.
+|
 |--------------------------------------------------------------------------
 */
+
 class PropertyService {
 
     /*
-|--------------------------------------------------------------------------
-| Check Whether Property Can Be Edited
-|--------------------------------------------------------------------------
-*/
+    |--------------------------------------------------------------------------
+    | Check Whether Property Can Be Edited
+    |--------------------------------------------------------------------------
+    */
 
-canEdit(property) {
+    canEdit(property) {
 
-    return ["Draft", "Rejected"].includes(
-        property.approvalStatus
-    );
+        return ["Draft", "Rejected"].includes(
+            property.approval.status
+        );
 
-}
+    }
 
-/*
-|--------------------------------------------------------------------------
-| Check Whether Property Can Be Deleted
-|--------------------------------------------------------------------------
-*/
+    /*
+    |--------------------------------------------------------------------------
+    | Check Whether Property Can Be Deleted
+    |--------------------------------------------------------------------------
+    */
 
-canDelete(property) {
+    canDelete(property) {
 
-    return ["Draft", "Rejected"].includes(
-        property.approvalStatus
-    );
+        return ["Draft", "Rejected"].includes(
+            property.approval.status
+        );
 
-}
+    }
 
-/*
-|--------------------------------------------------------------------------
-| Check Whether Property Can Be Submitted
-|--------------------------------------------------------------------------
-*/
+    /*
+    |--------------------------------------------------------------------------
+    | Check Whether Property Can Be Submitted
+    |--------------------------------------------------------------------------
+    */
 
-canSubmit(property) {
+    canSubmit(property) {
 
-    return ["Draft", "Rejected"].includes(
-        property.approvalStatus
-    );
+        return ["Draft", "Rejected"].includes(
+            property.approval.status
+        );
 
-}
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Create Property
     |--------------------------------------------------------------------------
     */
+
     async createProperty(sellerId, propertyData) {
+
         const property = await Property.create({
+
             ...propertyData,
+
             seller: sellerId,
-            approvalStatus: "Draft",
+
+            approval: {
+                status: "Draft"
+            },
 
             listingStatus: "Inactive"
 
@@ -89,7 +101,9 @@ canSubmit(property) {
             isDeleted: false
 
         })
-            .sort({ createdAt: -1 });
+            .sort({
+                createdAt: -1
+            });
 
     }
 
@@ -133,7 +147,11 @@ canSubmit(property) {
     |--------------------------------------------------------------------------
     */
 
-    async updateProperty(propertyId, sellerId, updateData) {
+    async updateProperty(
+        propertyId,
+        sellerId,
+        updateData
+    ) {
 
         const property = await this.getPropertyById(
 
@@ -144,25 +162,49 @@ canSubmit(property) {
         );
 
         /*
-        -------------------------------------------------------------
+        |--------------------------------------------------------------------------
         | Only Draft and Rejected properties can be edited.
-        -------------------------------------------------------------
+        |--------------------------------------------------------------------------
         */
 
         if (!this.canEdit(property)) {
+
             throw new ApiError(
+
                 403,
+
                 "Only Draft or Rejected properties can be edited."
+
             );
+
         }
 
-        Object.assign(
+        /*
+        |--------------------------------------------------------------------------
+        | Update Property Data
+        |--------------------------------------------------------------------------
+        */
+        const allowedFields = [
+            "title",
+            "description",
+            "propertyType",
+    "listingType",
+    "price",
+    "location",
+    "bedrooms",
+    "bathrooms",
+    "area",
+    "amenities",
+    "furnishing",
+    "parking",
+    "features"
+];
 
-            property,
-
-            updateData
-
-        );
+for (const field of allowedFields) {
+    if (updateData[field] !== undefined) {
+        property[field] = updateData[field];
+    }
+}
 
         await property.save();
 
@@ -176,7 +218,10 @@ canSubmit(property) {
     |--------------------------------------------------------------------------
     */
 
-    async deleteProperty(propertyId, sellerId) {
+    async deleteProperty(
+        propertyId,
+        sellerId
+    ) {
 
         const property = await this.getPropertyById(
 
@@ -187,23 +232,27 @@ canSubmit(property) {
         );
 
         /*
-        -------------------------------------------------------------
+        |--------------------------------------------------------------------------
         | Draft & Rejected properties can be deleted.
-        -------------------------------------------------------------
+        |--------------------------------------------------------------------------
         */
 
         if (!this.canDelete(property)) {
-           throw new ApiError(
-        403,
-        "This property cannot be deleted."
-    );
 
-}
+            throw new ApiError(
+
+                403,
+
+                "This property cannot be deleted."
+
+            );
+
+        }
 
         /*
-        -------------------------------------------------------------
+        |--------------------------------------------------------------------------
         | Soft Delete
-        -------------------------------------------------------------
+        |--------------------------------------------------------------------------
         */
 
         property.isDeleted = true;
@@ -222,7 +271,10 @@ canSubmit(property) {
     |--------------------------------------------------------------------------
     */
 
-    async submitForApproval(propertyId, sellerId) {
+    async submitForApproval(
+        propertyId,
+        sellerId
+    ) {
 
         const property = await this.getPropertyById(
 
@@ -233,35 +285,56 @@ canSubmit(property) {
         );
 
         /*
-        -------------------------------------------------------------
+        |--------------------------------------------------------------------------
         | Allow submission only from Draft or Rejected.
-        -------------------------------------------------------------
+        |--------------------------------------------------------------------------
         */
 
         if (!this.canSubmit(property)) {
+
             throw new ApiError(
-            400,
-            "Property cannot be submitted."
-        );
-    }
+
+                400,
+
+                "Property cannot be submitted."
+
+            );
+
+        }
+
         /*
-        -------------------------------------------------------------
+        |--------------------------------------------------------------------------
         | Require at least one image.
-        -------------------------------------------------------------
+        |--------------------------------------------------------------------------
         */
 
         if (
             !property.images ||
             property.images.length === 0
         ) {
+
             throw new ApiError(
+
                 400,
+
                 "Upload at least one property image."
+
             );
+
         }
-        property.approvalStatus = "Pending";
+
+        /*
+        |--------------------------------------------------------------------------
+        | Change Approval Status
+        |--------------------------------------------------------------------------
+        */
+
+        property.approval.status = "Pending";
+
         await property.save();
+
         return property;
+
     }
 
     /*
@@ -288,48 +361,120 @@ canSubmit(property) {
 
         ] = await Promise.all([
 
-            Property.countDocuments({
-                seller: sellerId,
-                isDeleted: false
-            }),
+            /*
+            |--------------------------------------------------------------------------
+            | Total Properties
+            |--------------------------------------------------------------------------
+            */
 
             Property.countDocuments({
+
                 seller: sellerId,
-                approvalStatus: "Draft",
+
                 isDeleted: false
-            }),
-            Property.countDocuments({
-                seller: sellerId,
-                approvalStatus: "Pending",
-                isDeleted: false
+
             }),
 
-            Property.countDocuments({
-                seller: sellerId,
-                approvalStatus: "Approved",
-                isDeleted: false
-            }),
+            /*
+            |--------------------------------------------------------------------------
+            | Draft Properties
+            |--------------------------------------------------------------------------
+            */
 
             Property.countDocuments({
+
                 seller: sellerId,
-                approvalStatus: "Rejected",
+
+                "approval.status": "Draft",
+
                 isDeleted: false
+
             }),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Pending Properties
+            |--------------------------------------------------------------------------
+            */
+
             Property.countDocuments({
+
                 seller: sellerId,
+
+                "approval.status": "Pending",
+
+                isDeleted: false
+
+            }),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Approved Properties
+            |--------------------------------------------------------------------------
+            */
+
+            Property.countDocuments({
+
+                seller: sellerId,
+
+                "approval.status": "Approved",
+
+                isDeleted: false
+
+            }),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Rejected Properties
+            |--------------------------------------------------------------------------
+            */
+
+            Property.countDocuments({
+
+                seller: sellerId,
+
+                "approval.status": "Rejected",
+
+                isDeleted: false
+
+            }),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Active Properties
+            |--------------------------------------------------------------------------
+            */
+
+            Property.countDocuments({
+
+                seller: sellerId,
+
                 listingStatus: "Active",
+
                 isDeleted: false
+
             })
+
         ]);
 
         return {
+
             totalProperties,
+
             draftProperties,
+
             pendingProperties,
+
             approvedProperties,
+
             rejectedProperties,
+
             activeProperties
+
         };
+
     }
+
 }
+
 export default new PropertyService();

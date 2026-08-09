@@ -3,6 +3,8 @@ import { Router } from "express";
 import SellerPropertyController from "../../controllers/seller/seller-property.controller.js";
 
 // Authentication middleware
+// Use the authentication middleware created by your senior.
+// Uncomment the correct middleware import when connecting it.
 // import { verifySeller } from "../../middleware/auth.middleware.js";
 
 const router = Router();
@@ -11,17 +13,22 @@ const router = Router();
 |--------------------------------------------------------------------------
 | SELLER PROPERTY ROUTES
 |--------------------------------------------------------------------------
-| Authentication will be enabled after the authentication
-| module is completed.
+|
+| These routes are for the authenticated seller.
+|
+| The seller ID is NOT taken from the URL.
+| It must come from req.user._id after authentication.
+|
 |--------------------------------------------------------------------------
 */
+
 
 /*
 |--------------------------------------------------------------------------
 | GET ALL SELLER PROPERTIES
 |--------------------------------------------------------------------------
 |
-| Query Parameters:
+| Optional Query Parameters:
 |
 | page
 | limit
@@ -30,39 +37,40 @@ const router = Router();
 | listingStatus
 | sort
 |
+|--------------------------------------------------------------------------
 */
+
 router.get(
-    "/:sellerId",
-
+    "/",
     // verifySeller,
-
     SellerPropertyController.getSellerProperties
 );
+
 
 /*
 |--------------------------------------------------------------------------
 | GET PROPERTY STATISTICS
 |--------------------------------------------------------------------------
 */
+
 router.get(
-    "/:sellerId/statistics",
-
+    "/statistics",
     // verifySeller,
-
     SellerPropertyController.getSellerPropertyCounts
 );
 
+
 /*
 |--------------------------------------------------------------------------
-| GET SINGLE PROPERTY
+| GET SINGLE SELLER PROPERTY
 |--------------------------------------------------------------------------
 */
+
 router.get(
-    "/:sellerId/:propertyId",
-
+    "/:propertyId",
     // verifySeller,
-
     SellerPropertyController.getSellerPropertyById
 );
+
 
 export default router;
