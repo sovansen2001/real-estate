@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 import Enquiry from "../models/enquiry.model.js";
 import Property from "../models/property.model.js";
 import ApiError from "../utils/api-error.js";
@@ -7,80 +8,181 @@ class EnquiryService {
 
     /*
     |--------------------------------------------------------------------------
-    | Create Property Enquiry
+    | CREATE PROPERTY ENQUIRY
+    |--------------------------------------------------------------------------
+    |
+    | Public endpoint.
+    |
+    | A visitor can submit an enquiry without authentication.
+    | If authentication exists, userId is stored.
+    |
     |--------------------------------------------------------------------------
     */
+
     async createEnquiry(enquiryData, userId = null) {
+
         const {
             property,
             name,
             email,
             phone,
-            message
+            message = ""
         } = enquiryData;
-        // Validate property ID
-        if (!mongoose.Types.ObjectId.isValid(property)) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDATE PROPERTY ID
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            !mongoose.Types.ObjectId.isValid(property)
+        ) {
+
             throw new ApiError(
                 400,
                 "Invalid property id."
             );
         }
-        // Check that the property exists and is publicly visible
-        const propertyData = await Property.findOne({
-            _id: property,
-            isDeleted: false,
-            listingStatus: "Active",
-            "approval.status": "Approved"
-        }).select("_id seller");
+
+        /*
+        |--------------------------------------------------------------------------
+        | CHECK PUBLIC PROPERTY
+        |--------------------------------------------------------------------------
+        |
+        | An enquiry can only be created for a property
+        | that is publicly visible.
+        |
+        |--------------------------------------------------------------------------
+        */
+
+        const propertyData =
+            await Property.findOne({
+
+                _id: property,
+
+                isDeleted: false,
+
+                listingStatus: "Active",
+
+                "approval.status": "Approved"
+
+            })
+                .select("_id seller")
+                .lean();
+
         if (!propertyData) {
+
             throw new ApiError(
                 404,
                 "Property not found."
             );
         }
-        const enquiry = await Enquiry.create({
-            property,
-            user: userId,
-            name,
-            email,
-            phone,
-            message
-        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | CREATE ENQUIRY
+        |--------------------------------------------------------------------------
+        */
+
+        const enquiry =
+            await Enquiry.create({
+
+                property: propertyData._id,
+
+                user: userId,
+
+                name,
+
+                email,
+
+                phone,
+
+                message
+
+            });
+
+        /*
+        |--------------------------------------------------------------------------
+        | INCREMENT PROPERTY ENQUIRY COUNT
+        |--------------------------------------------------------------------------
+        */
+
+        await Property.updateOne(
+
+            {
+                _id: propertyData._id
+            },
+
+            {
+                $inc: {
+                    "analytics.enquiries": 1
+                }
+            }
+
+        );
+
         return enquiry;
     }
 
     /*
     |--------------------------------------------------------------------------
-    | Get Seller Enquiries
+    | GET SELLER ENQUIRIES
     |--------------------------------------------------------------------------
     */
+
     async getSellerEnquiries(sellerId) {
-        if (!mongoose.Types.ObjectId.isValid(sellerId)) {
+
+        if (
+            !mongoose.Types.ObjectId.isValid(
+                sellerId
+            )
+        ) {
+
             throw new ApiError(
                 400,
                 "Invalid seller id."
             );
         }
-        const enquiries = await Enquiry.find({
-            isDeleted: false
-        })
-            .populate({
-                path: "property",
-                match: {
-                    seller: sellerId,
-                    isDeleted: false
-                },
-                select: "title price location images"
+
+        const enquiries =
+            await Enquiry.find({
+
+                isDeleted: false
+
             })
-            .populate(
-                "user",
-                "name email phone"
-            )
-            .sort({
-                createdAt: -1
-            })
-            .lean();
-        // Remove enquiries whose property does not belong to this seller
+                .populate({
+
+                    path: "property",
+
+                    match: {
+
+                        seller: sellerId,
+
+                        isDeleted: false
+
+                    },
+
+                    select:
+                        "title price location images"
+
+                })
+                .populate(
+                    "user",
+                    "name email phone"
+                )
+                .sort({
+                    createdAt: -1
+                })
+                .lean();
+
+        /*
+        |--------------------------------------------------------------------------
+        | REMOVE ENQUIRIES WHOSE PROPERTY DOES NOT
+        | BELONG TO THIS SELLER
+        |--------------------------------------------------------------------------
+        */
+
         return enquiries.filter(
             enquiry => enquiry.property
         );
@@ -88,85 +190,160 @@ class EnquiryService {
 
     /*
     |--------------------------------------------------------------------------
-    | Get Enquiry By Id
+    | GET ENQUIRY BY ID
     |--------------------------------------------------------------------------
     */
-    async getEnquiryById(enquiryId, sellerId) {
-        if (!mongoose.Types.ObjectId.isValid(enquiryId)) {
+
+    async getEnquiryById(
+        enquiryId,
+        sellerId
+    ) {
+
+        if (
+            !mongoose.Types.ObjectId.isValid(
+                enquiryId
+            )
+        ) {
+
             throw new ApiError(
                 400,
                 "Invalid enquiry id."
             );
         }
-        const enquiry = await Enquiry.findOne({
-            _id: enquiryId,
-            isDeleted: false
-        })
-            .populate({
-                path: "property",
-                match: {
-                    seller: sellerId,
-                    isDeleted: false
-                },
-                select: "title price location images"
-            })
-            .populate(
-                "user",
-                "name email phone"
+
+        if (
+            !mongoose.Types.ObjectId.isValid(
+                sellerId
             )
-            .lean();
-        if (!enquiry || !enquiry.property) {
+        ) {
+
+            throw new ApiError(
+                400,
+                "Invalid seller id."
+            );
+        }
+
+        const enquiry =
+            await Enquiry.findOne({
+
+                _id: enquiryId,
+
+                isDeleted: false
+
+            })
+                .populate({
+
+                    path: "property",
+
+                    match: {
+
+                        seller: sellerId,
+
+                        isDeleted: false
+
+                    },
+
+                    select:
+                        "title price location images"
+
+                })
+                .populate(
+                    "user",
+                    "name email phone"
+                )
+                .lean();
+
+        if (
+            !enquiry ||
+            !enquiry.property
+        ) {
+
             throw new ApiError(
                 404,
                 "Enquiry not found."
             );
         }
+
         return enquiry;
     }
 
     /*
     |--------------------------------------------------------------------------
-    | Update Enquiry Status
+    | UPDATE ENQUIRY STATUS
     |--------------------------------------------------------------------------
     */
+
     async updateEnquiryStatus(
         enquiryId,
         sellerId,
         status
     ) {
+
         const allowedStatuses = [
+
             "New",
+
             "Contacted",
+
             "In Progress",
+
             "Closed"
+
         ];
-        if (!allowedStatuses.includes(status)) {
+
+        if (
+            !allowedStatuses.includes(status)
+        ) {
+
             throw new ApiError(
                 400,
                 "Invalid enquiry status."
             );
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | VERIFY SELLER OWNS THE ENQUIRY
+        |--------------------------------------------------------------------------
+        */
+
         const enquiry =
             await this.getEnquiryById(
                 enquiryId,
                 sellerId
             );
+
+        /*
+        |--------------------------------------------------------------------------
+        | UPDATE
+        |--------------------------------------------------------------------------
+        */
+
         const updatedEnquiry =
             await Enquiry.findByIdAndUpdate(
+
                 enquiry._id,
+
                 {
-                    status
+                    $set: {
+                        status
+                    }
                 },
+
                 {
-                    new: true
+                    new: true,
+                    runValidators: true
                 }
+
             )
                 .populate(
                     "property",
                     "title price location"
                 )
                 .lean();
+
         return updatedEnquiry;
     }
 }
+
 export default new EnquiryService();
