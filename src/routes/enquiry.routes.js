@@ -1,6 +1,6 @@
 import express from "express";
 import EnquiryController from "../controllers/enquiry.controller.js";
-import { verifyJWT, authorizeRoles } from "../middleware/auth.middleware.js";
+//import { verifyJWT, authorizeRoles } from "../middleware/auth.middleware.js";
 import validate from "../middleware/validate.middleware.js";
 import {
     createEnquirySchema
@@ -27,10 +27,8 @@ const router = express.Router();
 |--------------------------------------------------------------------------
 | Create Enquiry
 |--------------------------------------------------------------------------
-|
 | Authentication is optional.
 | A visitor can submit an enquiry without logging in.
-|
 |--------------------------------------------------------------------------
 */
 router.post(
@@ -44,34 +42,24 @@ router.post(
 | Seller Enquiries
 |--------------------------------------------------------------------------
 */
-router.get(
-    "/",
-    verifyJWT,
-    authorizeRoles("seller"),
-    EnquiryController.getSellerEnquiries
-);
+// router.get(
+//     "/",
+//     verifyJWT,
+//     authorizeRoles("seller"),
+//     EnquiryController.getSellerEnquiries
+// );
 
-/*
-|--------------------------------------------------------------------------
-| Seller Enquiry Details
-|--------------------------------------------------------------------------
-*/
-router.get(
-    "/:enquiryId",
-    verifyJWT,
-    authorizeRoles("seller"),
-    EnquiryController.getEnquiryById
-);
+// router.get(
+//     "/:enquiryId",
+//     verifyJWT,
+//     authorizeRoles("seller"),
+//     EnquiryController.getEnquiryById
+// );
 
-/*
-|--------------------------------------------------------------------------
-| Update Enquiry Status
-|--------------------------------------------------------------------------
-*/
-router.patch(
-    "/:enquiryId/status",
-    verifyJWT,
-    authorizeRoles("seller"),
-    EnquiryController.updateEnquiryStatus
-);
+// router.patch(
+//     "/:enquiryId/status",
+//     verifyJWT,
+//     authorizeRoles("seller"),
+//     EnquiryController.updateEnquiryStatus
+// );
 export default router;
