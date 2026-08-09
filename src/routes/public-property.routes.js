@@ -1,35 +1,99 @@
 import express from "express";
-import PublicPropertyController from "../controllers/public-property.controller.js";
+
+import PublicPropertyController
+    from "../controllers/public-property.controller.js";
 
 const router = express.Router();
 
 /*
 |--------------------------------------------------------------------------
-| Public Property Routes
+| PUBLIC PROPERTY ROUTES
 |--------------------------------------------------------------------------
-| These APIs are accessible without authentication.
+|
+| Base URL:
+|
+| /api/v1/properties
+|
+| No authentication required.
+|
 |--------------------------------------------------------------------------
 */
 
-// Featured Properties
+/*
+|--------------------------------------------------------------------------
+| FEATURED
+|--------------------------------------------------------------------------
+|
+| GET /api/v1/properties/featured
+|
+| Optional:
+| ?limit=8
+|
+|--------------------------------------------------------------------------
+*/
+
 router.get(
     "/featured",
     PublicPropertyController.getFeaturedProperties
 );
 
-// Latest Properties
+/*
+|--------------------------------------------------------------------------
+| LATEST
+|--------------------------------------------------------------------------
+|
+| GET /api/v1/properties/latest
+|
+| Optional:
+| ?limit=12
+|
+|--------------------------------------------------------------------------
+*/
+
 router.get(
     "/latest",
     PublicPropertyController.getLatestProperties
 );
 
-// Search Properties
+/*
+|--------------------------------------------------------------------------
+| SEARCH / FILTER
+|--------------------------------------------------------------------------
+|
+| GET /api/v1/properties/search
+|
+| Examples:
+|
+| ?listingType=sale
+| ?listingType=rent
+| ?propertyType=flat
+| ?city=Hyderabad
+| ?minPrice=5000000
+| ?maxPrice=20000000
+| ?bedrooms=3
+| ?furnishing=fully
+| ?page=1
+| ?limit=12
+| ?sort=price-low
+|
+|--------------------------------------------------------------------------
+*/
+
 router.get(
     "/search",
     PublicPropertyController.searchProperties
 );
 
-// Property Details
+/*
+|--------------------------------------------------------------------------
+| PROPERTY DETAILS
+|--------------------------------------------------------------------------
+|
+| GET /api/v1/properties/:propertyId
+|
+|--------------------------------------------------------------------------
+*/
+
 router.get(
     "/:propertyId",
     PublicPropertyController.getPropertyDetails
