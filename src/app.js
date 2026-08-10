@@ -13,6 +13,7 @@ import adminDashboardRoutes from "./routes/admin/admin-dashboard.routes.js";
 import adminUserRoutes from "./routes/admin/user-management.routes.js";
 import adminPropertyRoutes from "./routes/admin/property-management.routes.js";
 import buyerDashboardRoutes from "./routes/buyer/buyer-dashboard.routes.js";
+import propertyDiscoveryRoutes from "./routes/buyer/property-discovery.routes.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import multerErrorHandler from "./middleware/multer-error.middleware.js";
 
@@ -171,6 +172,10 @@ app.use(
 app.use(
     "/api/v1/buyer/dashboard",
     buyerDashboardRoutes
+);
+app.use(
+    "/api/v1/buyer/properties",
+    propertyDiscoveryRoutes
 );
 /*
  * ============================================================
