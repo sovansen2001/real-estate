@@ -9,6 +9,9 @@ import sellerPropertyRoutes from "./routes/seller/seller-property.routes.js";
 import publicPropertyRoutes from "./routes/public-property.routes.js";
 import enquiryRoutes from "./routes/enquiry.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
+import adminDashboardRoutes from "./routes/admin/admin-dashboard.routes.js";
+import adminUserRoutes from "./routes/admin/user-management.routes.js";
+import adminPropertyRoutes from "./routes/admin/property-management.routes.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import multerErrorHandler from "./middleware/multer-error.middleware.js";
 
@@ -151,6 +154,18 @@ app.use(
 app.use(
     "/api/v1/contact",
     contactRoutes
+);
+app.use(
+    "/api/v1/admin/dashboard",
+    adminDashboardRoutes
+);
+app.use(
+    "/api/v1/admin/users",
+    adminUserRoutes
+);
+app.use(
+    "/api/v1/admin/properties",
+    adminPropertyRoutes
 );
 /*
  * ============================================================
