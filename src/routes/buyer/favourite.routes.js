@@ -28,4 +28,10 @@ router.get(
     // requireBuyer,
     FavouriteController.getMyFavourites
 );
+router.delete(
+    "/:propertyId",
+    // verifyJWT,
+    // requireBuyer,
+    FavouriteController.removeFavourite
+);
 export default router;

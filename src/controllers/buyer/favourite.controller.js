@@ -58,6 +58,32 @@ class FavouriteController {
 
     }
 }
+async removeFavourite(req, res, next) {
+
+    try {
+
+        const buyerId = req.user._id;
+        const { propertyId } = req.params;
+
+        await FavouriteService.removeFavourite(
+            buyerId,
+            propertyId
+        );
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                null,
+                "Property removed from favourites successfully."
+            )
+        );
+
+    } catch (error) {
+
+        next(error);
+
+    }
+}
 }
 
 export default new FavouriteController();

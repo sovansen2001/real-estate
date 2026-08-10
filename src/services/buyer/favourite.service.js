@@ -131,6 +131,39 @@ class FavouriteService {
             favourite => favourite.property
         );
     }
+    async removeFavourite(buyerId, propertyId) {
+        if (!mongoose.Types.ObjectId.isValid(propertyId)) {
+            throw new ApiError(
+                400,
+                "Invalid property id."
+            );
+        }
+
+        const favourite = await Favourite.findOneAndDelete({
+            buyer: buyerId,
+            property: propertyId
+        });
+        if (!favourite) {
+            throw new ApiError(
+                404,
+                "Property is not in your favourites."
+            );
+        }
+        await Property.updateOne({
+            _id: propertyId,
+            "analytics.favourites": {
+                $gt: 0
+            }
+        },
+        {
+            $inc: {
+                "analytics.favourites": -1
+            }
+        }
+    );
+
+    return true;
+}
 }
 
 export default new FavouriteService();

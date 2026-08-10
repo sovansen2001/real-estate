@@ -15,6 +15,8 @@ import adminPropertyRoutes from "./routes/admin/property-management.routes.js";
 import buyerDashboardRoutes from "./routes/buyer/buyer-dashboard.routes.js";
 import propertyDiscoveryRoutes from "./routes/buyer/property-discovery.routes.js";
 import favouriteRoutes from "./routes/buyer/favourite.routes.js";
+import recentlyViewedRoutes from "./routes/buyer/recently-viewed.routes.js";
+import buyerEnquiryRoutes from "./routes/buyer/buyer-enquiry.routes.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import multerErrorHandler from "./middleware/multer-error.middleware.js";
 
@@ -181,6 +183,14 @@ app.use(
 app.use(
     "/api/v1/buyer/favourites",
     favouriteRoutes
+);
+app.use(
+    "/api/v1/buyer/recently-viewed",
+    recentlyViewedRoutes
+);
+app.use(
+    "/api/v1/buyer/enquiries",
+    buyerEnquiryRoutes
 );
 /*
  * ============================================================
