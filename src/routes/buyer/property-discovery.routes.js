@@ -26,4 +26,5 @@ router.get(
     // requireBuyer,
     PropertyDetailsController.getPropertyDetails
 );
+
 export default router;

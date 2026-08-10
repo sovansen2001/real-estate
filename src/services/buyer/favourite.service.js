@@ -95,6 +95,42 @@ class FavouriteService {
 
         return favourite;
     }
+    async getMyFavourites(buyerId) {
+        const favourites = await Favourite.find({
+            buyer: buyerId
+        })
+        .populate({
+            path: "property",
+            match: {
+                isDeleted: false,
+                "approval.status": "Approved",
+                listingStatus: "Active"
+            },
+            select: [
+                "title",
+                "slug",
+                "propertyType",
+                "listingType",
+                "price",
+                "currency",
+                "area",
+                "location",
+                "specifications",
+                "amenities",
+                "images",
+                "isFeatured",
+                "analytics.views"
+            ].join(" ")
+        })
+        .sort({
+            createdAt: -1
+        })
+        .lean();
+
+        return favourites.filter(
+            favourite => favourite.property
+        );
+    }
 }
 
 export default new FavouriteService();
