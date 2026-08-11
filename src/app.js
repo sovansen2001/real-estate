@@ -19,6 +19,7 @@ import recentlyViewedRoutes from "./routes/buyer/recently-viewed.routes.js";
 import buyerEnquiryRoutes from "./routes/buyer/buyer-enquiry.routes.js";
 import property360RequestRoutes from "./routes/buyer/property-360-request.routes.js";
 import buyerProfileRoutes from "./routes/buyer/buyer-profile.routes.js";
+import brokerDashboardRoutes from "./routes/broker/broker-dashboard.routes.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import multerErrorHandler from "./middleware/multer-error.middleware.js";
 
@@ -201,6 +202,10 @@ app.use(
 app.use(
     "/api/v1/buyer/profile",
     buyerProfileRoutes
+);
+app.use(
+    "/api/v1/broker/dashboard",
+    brokerDashboardRoutes
 );
 /*
  * ============================================================
