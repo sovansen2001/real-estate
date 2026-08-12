@@ -187,5 +187,239 @@ class BrokerPropertyService {
         }
         return property;
     }
+    async updateMyProperty(
+    brokerId,
+    propertyId,
+    updateData
+) {
+    if (!mongoose.Types.ObjectId.isValid(propertyId)) {
+        throw new ApiError(
+            400,
+            "Invalid property id."
+        );
+    }
+
+    const property = await Property.findOne({
+        _id: propertyId,
+        seller: brokerId,
+        isDeleted: false
+    });
+
+    if (!property) {
+        throw new ApiError(
+            404,
+            "Property not found."
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DO NOT ALLOW BROKER TO CHANGE ADMIN CONTROLLED FIELDS
+    |--------------------------------------------------------------------------
+    */
+
+    const allowedFields = [
+        "title",
+        "description",
+        "propertyType",
+        "listingType",
+        "price",
+        "negotiable",
+        "currency",
+        "area",
+        "location",
+        "specifications",
+        "amenities",
+        "seo"
+    ];
+
+    for (const field of allowedFields) {
+        if (updateData[field] !== undefined) {
+            property[field] = updateData[field];
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | PROPERTY EDIT REQUIRES ADMIN REVIEW AGAIN
+    |--------------------------------------------------------------------------
+    */
+
+    property.approval.status = "Pending";
+    property.approval.reviewedBy = null;
+    property.approval.reviewedAt = null;
+    property.approval.rejectionReason = null;
+
+    property.listingStatus = "Inactive";
+
+    await property.save();
+
+    return property;
+}
+async deleteMyProperty(
+    brokerId,
+    propertyId
+) {
+
+    if (!mongoose.Types.ObjectId.isValid(propertyId)) {
+        throw new ApiError(
+            400,
+            "Invalid property id."
+        );
+    }
+
+    const property = await Property.findOne({
+        _id: propertyId,
+        seller: brokerId,
+        isDeleted: false
+    });
+
+    if (!property) {
+        throw new ApiError(
+            404,
+            "Property not found."
+        );
+    }
+
+    property.isDeleted = true;
+    property.deletedAt = new Date();
+
+    await property.save();
+
+    return true;
+}
+async updateListingStatus(
+    brokerId,
+    propertyId,
+    listingStatus
+) {
+    if (!mongoose.Types.ObjectId.isValid(propertyId)) {
+        throw new ApiError(
+            400,
+            "Invalid property id."
+        );
+    }
+
+    if (!["Active", "Inactive"].includes(listingStatus)) {
+        throw new ApiError(
+            400,
+            "Invalid listing status."
+        );
+    }
+
+    const property = await Property.findOne({
+        _id: propertyId,
+        seller: brokerId,
+        isDeleted: false
+    });
+
+    if (!property) {
+        throw new ApiError(
+            404,
+            "Property not found."
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | ONLY APPROVED PROPERTY CAN BE ACTIVATED
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+        listingStatus === "Active" &&
+        property.approval.status !== "Approved"
+    ) {
+        throw new ApiError(
+            400,
+            "Only an approved property can be activated."
+        );
+    }
+
+    property.listingStatus = listingStatus;
+
+    await property.save();
+
+    return {
+        propertyId: property._id,
+        listingStatus: property.listingStatus
+    };
+}
+async submitForApproval(brokerId, propertyId) {
+
+    if (!mongoose.Types.ObjectId.isValid(propertyId)) {
+        throw new ApiError(
+            400,
+            "Invalid property id."
+        );
+    }
+
+    const property = await Property.findOne({
+        _id: propertyId,
+        seller: brokerId,
+        isDeleted: false
+    });
+
+    if (!property) {
+        throw new ApiError(
+            404,
+            "Property not found."
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | ALREADY APPROVED
+    |--------------------------------------------------------------------------
+    */
+
+    if (property.approval.status === "Approved") {
+        throw new ApiError(
+            400,
+            "Property is already approved."
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | REQUIRED PROPERTY CHECK
+    |--------------------------------------------------------------------------
+    */
+
+    if (!property.title || !property.description) {
+        throw new ApiError(
+            400,
+            "Property title and description are required."
+        );
+    }
+
+    if (!property.images || property.images.length === 0) {
+        throw new ApiError(
+            400,
+            "At least one property image is required."
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | SUBMIT / RESUBMIT
+    |--------------------------------------------------------------------------
+    */
+
+    property.approval.status = "Pending";
+    property.approval.reviewedBy = null;
+    property.approval.reviewedAt = null;
+    property.approval.rejectionReason = null;
+
+    property.listingStatus = "Inactive";
+
+    await property.save();
+
+    return {
+        propertyId: property._id,
+        approvalStatus: property.approval.status,
+        listingStatus: property.listingStatus
+    };
+}
 }
 export default new BrokerPropertyService();

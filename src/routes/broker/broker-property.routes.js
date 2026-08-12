@@ -38,4 +38,28 @@ router.get(
     // requireBroker,
     BrokerPropertyController.getMyPropertyById
 );
+router.patch(
+    "/:propertyId",
+    // verifyJWT,
+    // requireBroker,
+    BrokerPropertyController.updateMyProperty
+);
+router.delete(
+    "/:propertyId",
+    // verifyJWT,
+    // requireBroker,
+    BrokerPropertyController.deleteMyProperty
+);
+router.patch(
+    "/:propertyId/status",
+    // verifyJWT,
+    // requireBroker,
+    BrokerPropertyController.updateListingStatus
+);
+router.patch(
+    "/:propertyId/submit",
+    // verifyJWT,
+    // requireBroker,
+    BrokerPropertyController.submitForApproval
+);
 export default router;

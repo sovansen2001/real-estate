@@ -1,6 +1,4 @@
-import Property360ManagementService
-    from "../../services/admin/property-360-management.service.js";
-
+import Property360ManagementService from "../../services/admin/property-360-management.service.js";
 import asyncHandler from "../../utils/async-handler.js";
 import ApiResponse from "../../utils/api-response.js";
 
