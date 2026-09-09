@@ -27,6 +27,7 @@ import broker360ViewRoutes from "./routes/broker/broker-360-view.routes.js";
 import brokerAnalyticsRoutes from "./routes/broker/broker-analytics.routes.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import multerErrorHandler from "./middleware/multer-error.middleware.js";
+import propertyImageRoutes from "./routes/seller/property-image.routes.js";
 
 /*
  * ============================================================
@@ -50,15 +51,43 @@ app.use(helmet());
  * CORS
  * ============================================================
  *
- * Only our configured frontend is allowed to access the API.
+ * Only our configured frontend(s) are allowed to access the API.
+ *
+ * CLIENT_URL may contain a single origin or a comma-separated
+ * list (useful in dev, since the static frontend has no fixed
+ * dev-server port — e.g. VS Code Live Server, `npx serve`,
+ * Python's http.server, etc. all use different ports).
+ *
+ * The frontend can also be opened directly as a file
+ * (file://...), in which case browsers send `Origin: null`.
+ * That is allowed here for local development convenience.
  *
  * credentials: true is necessary if your senior's
  * authentication uses cookies.
  * ============================================================
  */
+const allowedOrigins = (process.env.CLIENT_URL || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
 app.use(
     cors({
-        origin: process.env.CLIENT_URL,
+        origin: (origin, callback) => {
+            // Requests with no Origin header (curl, Postman, server-to-server)
+            // or the `null` origin sent by file:// pages are allowed in dev.
+            if (
+                !origin ||
+                origin === "null" ||
+                allowedOrigins.includes(origin)
+            ) {
+                return callback(null, true);
+            }
+
+            return callback(
+                new Error(`CORS blocked for origin: ${origin}`)
+            );
+        },
         credentials: true,
         methods: [
             "GET",

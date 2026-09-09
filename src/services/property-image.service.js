@@ -1,4 +1,4 @@
-import cloudinary from "../config/cloudinary.js";
+import cloudinary from "../confiig/cloudinary.js";
 import Property from "../models/property.model.js";
 import ApiError from "../utils/api-error.js";
 

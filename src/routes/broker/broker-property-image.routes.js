@@ -14,7 +14,7 @@ router.post(
     "/:propertyId/images",
     // verifyJWT,
     // requireBroker,
-    PropertyImageController.uploadImage
+    PropertyImageController.uploadImages
 );
 
 /*
