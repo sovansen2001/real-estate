@@ -40,7 +40,6 @@ const app = express();
  * ============================================================
  * SECURITY HEADERS
  * ============================================================
- *
  * Helmet adds several security-related HTTP headers.
  * ============================================================
  */
@@ -184,6 +183,10 @@ app.use(
 app.use(
     "/api/v1/seller/property",
     sellerPropertyRoutes
+);
+app.use(
+    "/api/v1/seller/property",
+    propertyImageRoutes
 );
 app.use(
     "/api/v1/properties",
