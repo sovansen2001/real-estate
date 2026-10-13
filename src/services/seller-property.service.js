@@ -309,9 +309,9 @@ class SellerPropertyService {
                 property[field] = updateData[field];
             }
         }
+        // Validate and persist the updated property.
         await property.save();
         return property;
-
     }
 
     /*
